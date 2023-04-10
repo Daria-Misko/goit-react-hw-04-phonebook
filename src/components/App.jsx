@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Filter } from './Filter/Filter';
 import { ContactsList } from './ContactsList/ContactsList';
 import { Title, Notification } from './App.styles';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const contactsState = [
   { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
@@ -14,8 +14,14 @@ const contactsState = [
 ];
 
 export function App() {
-  const [contacts, setContacts] = useState(contactsState);
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(localStorage.getItem('contacts')) ?? contactsState
+  );
   const [filter, setFilter] = useState('');
+
+  useEffect(() =>
+    localStorage.setItem('contacts', JSON.stringify(contacts), [contacts])
+  );
 
   const addContact = newContact => {
     if (
@@ -29,7 +35,7 @@ export function App() {
         `${newContact.name} or ${newContact.number} has already existed`
       );
     }
-    setContacts(prevState => [...prevState, newContact]);
+    setContacts(prevContacts => [...prevContacts, newContact]);
   };
 
   const handleFilter = e => {
@@ -43,7 +49,9 @@ export function App() {
   };
 
   const handleDelete = id => {
-    setContacts(prevState => prevState.filter(contact => contact.id !== id));
+    setContacts(prevContacts =>
+      prevContacts.filter(contact => contact.id !== id)
+    );
   };
 
   const contactsList = getVisiableContacts();
